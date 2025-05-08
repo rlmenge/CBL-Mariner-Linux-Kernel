@@ -41,6 +41,10 @@ git checkout tags/<tag_name> -b <optional_branch_name>
 
 Replace `<tag_name>` with the desired tag (e.g., `rolling-lts/mariner-3/6.6.85.1`), and optionally provide a branch name if you want to create a branch from the tag.
 
+## Quickstart
+
+Use the [QUICKSTART](QUICKSTART.md) page to build the kernel on AzureLinux.
+
 ## Contribution
 
 If you wish to contribute to the documentation, feel free to open a pull request on this branch. Please ensure that your contributions align with the versioning and tagging conventions described above.

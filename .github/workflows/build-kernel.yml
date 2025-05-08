@@ -1,0 +1,32 @@
+name: Build Kernel on AzureLinux
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/azurelinux/base/core:3.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          tdnf install -y audit-devel build-essential cpio diffutils dwarves elfutils-libelf-devel flex gettext git glib-devel kbd kmod-devel libcap-devel libdnet-devel libmspack-devel ncurses-devel openssl openssl-devel pam-devel procps-ng-devel python3-devel pciutils-devel wget dracut grub2 vim
+
+      - name: Download kernel config
+        run: |
+          wget https://raw.githubusercontent.com/microsoft/azurelinux/3.0-dev/SPECS/kernel/config
+          cp config .config
+
+      - name: Prepare kernel config
+        run: make oldconfig || true
+
+      - name: Build kernel
+        run: make -j$(nproc)

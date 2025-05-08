@@ -1,6 +1,10 @@
 # CBL-Mariner-Linux-Kernel Documentation
 
-Welcome to the documentation branch of the **CBL-Mariner-Linux-Kernel** repository! This branch is dedicated to providing all the necessary documentation for understanding and utilizing the customized Linux kernel provided by Microsoft for AzureLinux (previously CBL-Mariner).
+Welcome to the documentation branch of the CBL-Mariner-Linux-Kernel repository! This branch is dedicated to providing comprehensive resources for understanding and working with the customized Linux kernel developed by Microsoft for AzureLinux (formerly known as CBL-Mariner).
+
+AzureLinux is a lightweight and secure Linux distribution designed by Microsoft for cloud and edge computing. 
+
+To learn more about how this kernel powers AzureLinux, visit the [AzureLinux](https://github.com/microsoft/azurelinux/) repository.
 
 ## Important Note on Tag Usage
 
@@ -41,9 +45,9 @@ git checkout tags/<tag_name> -b <optional_branch_name>
 
 Replace `<tag_name>` with the desired tag (e.g., `rolling-lts/mariner-3/6.6.85.1`), and optionally provide a branch name if you want to create a branch from the tag.
 
-## Quickstart
+## Building
 
-Use the [QUICKSTART](QUICKSTART.md) page to build the kernel on AzureLinux.
+To build the kernel on AzureLinux, refer to the [BUILDING.md](BUILDING.md) guide. It includes step-by-step instructions, prerequisites, and helpful tips to get started quickly.
 
 ## Contribution
 

@@ -13,10 +13,10 @@ jobs:
     container:
       image: mcr.microsoft.com/azurelinux/base/core:3.0
     steps:
-      
+
       - name: Install build dependencies
         run: |
-          sudo tdnf install -y tar audit-devel build-essential cpio diffutils dwarv
+          tdnf install -y --nogpgcheck tar audit-devel build-essential cpio diffutils dwarv
 
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -13,12 +13,15 @@ jobs:
     container:
       image: mcr.microsoft.com/azurelinux/base/core:3.0
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      
       - name: Install build dependencies
         run: |
-          tdnf install -y audit-devel build-essential cpio diffutils dwarves elfutils-libelf-devel flex gettext git glib-devel kbd kmod-devel libcap-devel libdnet-devel libmspack-devel ncurses-devel openssl openssl-devel pam-devel procps-ng-devel python3-devel pciutils-devel wget dracut grub2 vim
+          tdnf install -y tar audit-devel build-essential cpio diffutils dwarv
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: rolling-lts/mariner-3/6.6.88.1
 
       - name: Download kernel config
         run: |

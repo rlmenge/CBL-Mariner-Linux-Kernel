@@ -1312,6 +1312,67 @@ int cppc_get_nominal_perf(int cpunum, u64 *nominal_perf)
 }
 
 /**
+ * cppc_get_ospm_nominal_perf - Get the OSPM nominal performance register value.
+ * @cpunum: CPU from which to get OSPM nominal performance.
+ * @ospm_nominal_perf: Return address.
+ *
+ * If the register is not supported (pre-v4 or NULL register), falls back to
+ * the Nominal Performance value per ACPI 6.6 section 8.4.6.1.2.6:
+ * "If this register is not provided, then OSPM must assume that the OSPM
+ * Nominal Performance value is equal to the Nominal Performance value."
+ *
+ * Return: 0 for success, -EIO otherwise.
+ */
+int cppc_get_ospm_nominal_perf(int cpunum, u64 *ospm_nominal_perf)
+{
+	int ret;
+
+	ret = cppc_get_reg_val(cpunum, OSPM_NOMINAL_PERF, ospm_nominal_perf);
+	if (ret == -EOPNOTSUPP)
+		return cppc_get_reg_val(cpunum, NOMINAL_PERF, ospm_nominal_perf);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(cppc_get_ospm_nominal_perf);
+
+/**
+ * cppc_set_ospm_nominal_perf - Set the OSPM nominal performance register value.
+ * @cpunum: CPU for which to set OSPM nominal performance.
+ * @ospm_nominal_perf: Value to set, must be in [Lowest Performance, Nominal
+ *                     Performance] per ACPI 6.6 section 8.4.6.1.2.6.
+ *
+ * Return: 0 for success, -EINVAL if out of range, -EIO otherwise.
+ */
+int cppc_set_ospm_nominal_perf(int cpunum, u64 ospm_nominal_perf)
+{
+	struct cpc_desc *cpc_desc = per_cpu(cpc_desc_ptr, cpunum);
+	u64 lowest, nominal;
+	int ret;
+
+	if (!cpc_desc) {
+		pr_debug("No CPC descriptor for CPU:%d\n", cpunum);
+		return -ENODEV;
+	}
+
+	ret = cpc_read(cpunum, &cpc_desc->cpc_regs[LOWEST_PERF], &lowest);
+	if (ret)
+		return ret;
+
+	ret = cpc_read(cpunum, &cpc_desc->cpc_regs[NOMINAL_PERF], &nominal);
+	if (ret)
+		return ret;
+
+	if (ospm_nominal_perf < lowest || ospm_nominal_perf > nominal) {
+		pr_debug("OSPM nominal perf %llu out of range [%llu, %llu] for CPU:%d\n",
+			 ospm_nominal_perf, lowest, nominal, cpunum);
+		return -EINVAL;
+	}
+
+	return cppc_set_reg_val(cpunum, OSPM_NOMINAL_PERF, ospm_nominal_perf);
+}
+EXPORT_SYMBOL_GPL(cppc_set_ospm_nominal_perf);
+
+/**
  * cppc_get_highest_perf - Get the highest performance register value.
  * @cpunum: CPU from which to get highest performance.
  * @highest_perf: Return address.

@@ -4331,7 +4331,7 @@ EXPORT_SYMBOL(pci_wait_for_pending_transaction);
  */
 int pcie_flr(struct pci_dev *dev)
 {
-	unsigned int timeout;
+	unsigned int delay, timeout;
 
 	if (!pci_wait_for_pending_transaction(dev))
 		pci_err(dev, "timed out waiting for pending transaction; performing function level reset anyway\n");
@@ -4344,9 +4344,12 @@ int pcie_flr(struct pci_dev *dev)
 	/*
 	 * Per PCIe r4.0, sec 6.6.2, a device must complete an FLR within
 	 * 100ms, but may silently discard requests while the FLR is in
-	 * progress.  Wait 100ms before trying to access the device.
+	 * progress.  Wait 100ms by default before trying to access the device.
 	 */
-	msleep(100);
+	delay = dev->flr_reset_delay_ms ?: 100;
+	pci_dbg(dev, "FLR reset delay: %u ms%s\n", delay,
+		dev->flr_reset_delay_ms ? " (device override)" : " (default)");
+	msleep(delay);
 
 	timeout = pci_rrs_flr_timeout(dev);
 	pci_dbg(dev, "FLR readiness timeout: %u ms%s\n", timeout,

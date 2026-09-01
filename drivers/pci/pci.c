@@ -1289,6 +1289,11 @@ static int pci_dev_wait(struct pci_dev *dev, char *reset_type, int timeout)
 	return 0;
 }
 
+static unsigned int pci_rrs_flr_timeout(struct pci_dev *dev)
+{
+	return dev->rrs_flr_timeout_ms ?: PCIE_RESET_READY_POLL_MS;
+}
+
 /**
  * pci_power_up - Put the given device into D0
  * @dev: PCI device to power up
@@ -4326,6 +4331,8 @@ EXPORT_SYMBOL(pci_wait_for_pending_transaction);
  */
 int pcie_flr(struct pci_dev *dev)
 {
+	unsigned int timeout;
+
 	if (!pci_wait_for_pending_transaction(dev))
 		pci_err(dev, "timed out waiting for pending transaction; performing function level reset anyway\n");
 
@@ -4341,7 +4348,11 @@ int pcie_flr(struct pci_dev *dev)
 	 */
 	msleep(100);
 
-	return pci_dev_wait(dev, "FLR", PCIE_RESET_READY_POLL_MS);
+	timeout = pci_rrs_flr_timeout(dev);
+	pci_dbg(dev, "FLR readiness timeout: %u ms%s\n", timeout,
+		dev->rrs_flr_timeout_ms ? " (device override)" : " (default)");
+
+	return pci_dev_wait(dev, "FLR", timeout);
 }
 EXPORT_SYMBOL_GPL(pcie_flr);
 

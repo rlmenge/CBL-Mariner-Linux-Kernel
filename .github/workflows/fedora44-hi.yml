@@ -1,0 +1,53 @@
+name: Fedora 44 hello
+
+on:
+  schedule:
+    # GitHub Actions schedules use UTC: every day at 08:00 UTC.
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-stable:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:44
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          dnf -y install \
+            bc \
+            binutils \
+            bison \
+            cpio \
+            diffutils \
+            elfutils-libelf-devel \
+            flex \
+            gcc \
+            git \
+            make \
+            openssl-devel \
+            perl \
+            pkgconf-pkg-config \
+            python3 \
+            rsync \
+            tar \
+            xz \
+            zstd
+
+      - name: Check out stable branch
+        uses: actions/checkout@v4
+        with:
+          ref: fresh/stable
+
+      - name: Report build environment
+        run: |
+          echo "Building fresh/stable in Fedora $(rpm -E %fedora)"
+          echo "Kernel source: $(git describe --tags --always --dirty)"
+          echo "Builder: $(gcc --version | head -n1)"
+
+      - name: Configure kernel
+        run: make defconfig
+
+      - name: Build kernel
+        run: make -j"$(nproc)"

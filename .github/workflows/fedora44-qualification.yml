@@ -1,0 +1,58 @@
+name: Fedora 44 kernel qualification
+
+"on":
+  schedule:
+    # GitHub Actions schedules use UTC: every day at 08:30 UTC.
+    - cron: '30 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  qualify-stable:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:44
+      options: --privileged --tmpfs /dev/shm:rw,exec
+
+    steps:
+      - name: Install build and test dependencies
+        run: |
+          dnf -y install \
+            bc \
+            binutils \
+            bison \
+            cpio \
+            diffutils \
+            elfutils-libelf-devel \
+            flex \
+            gcc \
+            git \
+            make \
+            openssl-devel \
+            perl \
+            pkgconf-pkg-config \
+            python3 \
+            rsync \
+            tar \
+            xz \
+            zstd
+
+      - name: Check out stable branch
+        uses: actions/checkout@v4
+        with:
+          ref: fresh/stable
+
+      - name: Report qualification target
+        run: |
+          echo "Qualifying fresh/stable in Fedora $(rpm -E %fedora)"
+          echo "Kernel source: $(git describe --tags --always --dirty)"
+
+      - name: Build kernel
+        run: |
+          make O=/tmp/kernel-build defconfig
+          make O=/tmp/kernel-build -j"$(nproc)"
+
+      - name: Install and check kernel headers
+        run: make O=/tmp/kernel-build headers_install INSTALL_HDR_PATH=/tmp/kernel-headers
+
+      - name: Run KUnit tests
+        run: ./tools/testing/kunit/kunit.py run --kunitconfig tools/testing/kunit/configs/all_tests.config --raw_output=all --timeout=120

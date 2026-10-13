@@ -1,6 +1,9 @@
 name: Fedora 44 kernel qualification
 
 "on":
+  pull_request:
+    branches:
+      - docs
   schedule:
     # GitHub Actions schedules use UTC: every day at 08:30 UTC.
     - cron: '30 8 * * *'
